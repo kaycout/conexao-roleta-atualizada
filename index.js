@@ -1,78 +1,101 @@
 //será importada a biblioteca do node modules chamada "EXPRESS"
 // para criar nosso servidor backend da roleta.
-const express = require("express"); //ponto e vírgula é opcional
-
-//importar a biblioteca do mysql
-const mysql = require("BancoRoletaMysql");
-
-// estabelecer conexao com o banco de dados mysql
-const con = mysql.createConnection({
-    host:"127.0.0.1",
-    port:3307,
-    user:"root",
-    password:"",
-    database:"mydb"
-
-});
-
-//Carregar e instanciar o express para utilizar as rotas:
-//GET -> Para obter dados do banco de dados -> R
-//POST -> Para enviar dados ao servidor e gravar dados no banco -> C
-//PUT -> Para atualizar os dados no banco -> U
-//DELETE -> Para apagar dados em banco -> D
-
+const express = require("express");
 const app = express();
+const mysql = require("mysql2");
 
-//Carregar a função que manipula dados em formato JSON, ou seja, permite
-//ler, gravar, atualizar, deletar, enviar e receber dados em formato JSON
+const con = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "",
+    database: "roletadb" // nome do banco
+});
 
 app.use(express.json());
 
-// Primeira rota para listar os dados do banco:
-app.get("/listar",(req,res)=>{
-    // usar o comando select para para mostrar os dados do participante
-    con.query("Select * from participante", (error,result)=>{
-        if(error){
-            return res.status(500)
-            .send({erro:`Erro ao tentar listar os dados do participante${error}`});
-        }
-        res.status(200).send({msg:result});
-    })
+/* ROTA DOS PARTICIPANTES */
+
+// Rota para listar todos os dados de participante, sorteio e empresa
+app.get("/participante", (req, res) => {
+    const consultas = [
+        new Promise((resolve, reject) => {
+            con.query("SELECT * FROM participante", (err, result) => {
+                if (err) reject({ participante: err });
+                else resolve({ participante: result });
+            });
+        }),
+        new Promise((resolve, reject) => {
+            con.query("SELECT * FROM sorteio", (err, result) => {
+                if (err) reject({ sorteio: err });
+                else resolve({ sorteio: result });
+            });
+        }),
+        new Promise((resolve, reject) => {
+            con.query("SELECT * FROM empresa", (err, result) => {
+                if (err) reject({ empresa: err });
+                else resolve({ empresa: result });
+            });
+        })
+    ];
+
+    Promise.all(consultas)
+        .then(resultados => {
+            const dadosCompletos = Object.assign({}, ...resultados);
+            res.status(200).send(dadosCompletos);
+        })
+        .catch(error => {
+            res.status(500).send({
+                erro: "Erro ao buscar dados",
+                detalhes: error
+            });
+        });
 });
 
-// Segunda rota para saber se os dados do participante foram enviados:
-app.post("/cadastrar", (req,res)=>{
-    con.query("insert into participante set ?",req.body,(error, result)=>{
-        if(error){
-            return res.status(500).send({erro:`Erro ao tentar cadastrar ${error}`});
-        }
+/* ROTAS DA EMPRESA */
 
-        res.status(201).send({msg:`participante cadastrado`,playload:result}); // status code (201, por exemplo)
-    })
-
-    
+app.post("/cadastrar/empresa", (req, res) => {
+    con.query("INSERT INTO empresa SET ?", req.body, (error, result) => {
+        if (error) return res.status(500).send({ erro: `Erro ao cadastrar: ${error}` });
+        res.status(201).send({ msg: "Empresa cadastrada", payload: result });
+    });
 });
 
-// Terceira rota para receber os dados e atualizar:
-app.put("/atualizar/:id",(req,res)=>{
-    
-    con.query("update participante set ? where id=?",[req.body, req.params.id],(error,result)=>{
-        if(error){
-            return res.status(500).send({erro:`Erro ao tentar atualizar ${error}`})
-        }
-        res.status(200).send({msg:'Dados atualizados',id:req.params.id}) //pela url 
-        })
+app.put("/atualizar/empresa/:id", (req, res) => {
+    con.query("UPDATE empresa SET ? WHERE id = ?", [req.body, req.params.id], (error, result) => {
+        if (error) return res.status(500).send({ erro: `Erro ao atualizar: ${error}` });
+        res.status(200).send({ msg: "Empresa atualizada", id: req.params.id });
     });
+});
 
-// Quarta rota para receber um id e apagar um dados
-app.delete("/apagar/:id",(req,res)=>{
-    con.query("delete from participante set ? where id=?",req.params.id,(error,result)=>{
-        if(error){
-            return res.status(500).send({erro:`participante deletado ${error}`})
-        }
-        res.status(204).send({msg:'Dados deletados',id:req.params.id}) //pela url 
-        })
+app.delete("/apagar/empresa/:id", (req, res) => {
+    con.query("DELETE FROM empresa WHERE id = ?", req.params.id, (error, result) => {
+        if (error) return res.status(500).send({ erro: `Erro ao deletar: ${error}` });
+        res.status(204).send();
     });
+});
 
-app.listen(3000,
-    ()=>console.log("Servidor Online https://127.0.0.1:3000"))
+/* ROTAS DO SORTEIO */
+
+app.post("/cadastrar/sorteio", (req, res) => {
+    con.query("INSERT INTO sorteio SET ?", req.body, (error, result) => {
+        if (error) return res.status(500).send({ erro: `Erro ao cadastrar: ${error}` });
+        res.status(201).send({ msg: "Sorteio cadastrado", payload: result });
+    });
+});
+
+app.put("/atualizar/sorteio/:id", (req, res) => {
+    con.query("UPDATE sorteio SET ? WHERE id = ?", [req.body, req.params.id], (error, result) => {
+        if (error) return res.status(500).send({ erro: `Erro ao atualizar: ${error}` });
+        res.status(200).send({ msg: "Sorteio atualizado", id: req.params.id });
+    });
+});
+
+app.delete("/apagar/sorteio/:id", (req, res) => {
+    con.query("DELETE FROM sorteio WHERE id = ?", req.params.id, (error, result) => {
+        if (error) return res.status(500).send({ erro: `Erro ao deletar: ${error}` });
+        res.status(204).send();
+    });
+});
+
+// Start do servidor
+app.listen(3000, () => console.log("Servidor Online em http://127.0.0.1:3000"));
