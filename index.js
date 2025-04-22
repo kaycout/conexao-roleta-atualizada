@@ -4,8 +4,16 @@
 //será importada a biblioteca do node modules chamada "EXPRESS"
 // para criar nosso servidor backend da roleta.
 const express = require("express");
+
+//importar a biblioteca do mysql
 const mysql = require("mysql2");
+
+//importar a biblioteca do cors
 const cors = require("cors");
+
+//importar a biblioteca do bcrypt
+//para a criptografia de senha.
+const bcrypt = require("bcrypt");
 
 const con = mysql.createConnection({
     host: "localhost",
