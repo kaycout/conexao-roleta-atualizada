@@ -15,6 +15,29 @@ const cors = require("cors");
 //para a criptografia de senha.
 const bcrypt = require("bcrypt");
 
+//=>para o upload de arquivos.
+const multer = require("multer"); 
+const path = require("path");
+const fs = require("fs");
+
+// Verifica e cria a pasta uploads se não existir
+if (!fs.existsSync("uploads")) {
+    fs.mkdirSync("uploads");
+}
+
+//=>PDFKit — para gerar arquivos PDF.
+const PDFDocument = require("pdfkit");
+
+//para  não gerar arquivos tão grandes 
+const doc = new PDFDocument({size: 'A4'});
+
+
+//=>csv-parser — para ler arquivos CSV.
+const csvParser = require("csv-parser"); 
+
+//=>xlsx — para ler e manipular arquivos Excel (.xls, .xlsx).
+const xlsx = require("xlsx");
+
 const con = mysql.createConnection({
     host: "localhost",
     port:3307,
@@ -42,6 +65,15 @@ app.use(cors()); //responsavel por permitir ou bloquear acesso de outros domíni
 //Exemplo: Se minha API estiver rodando em http://localhost:3000 e deseja acessar a partir de um site 
 //que está em http://localhost:5173, o cors() precisa estar ativado, senão por medidas de segurança
 //o navegador irá bloquear.
+
+con.connect((err) => {
+    if (err) {
+        console.error("Erro ao conectar ao banco de dados:", err);
+        process.exit(1); // Se houver erro, o servidor não inicia
+    } else {
+        console.log("Conectado ao banco de dados!");
+    }
+});
 
 //ROTA DOS PARTICIPANTES
 
@@ -88,12 +120,12 @@ app.get("/participante",(req,res)=>{
 });
 
 app.post("/participante",(req,res)=>{
-    const{nome, equipe, supervisao, sorteio_id, via_qr} = req.body;
-        if(!nome || !equipe || !supervisao || !sorteio_id || !via_qr){
+    const{nome, equipe, supervisao, id_sorteio, via_qr} = req.body;
+        if(!nome || !equipe || !supervisao || !id_sorteio || !via_qr){
             return res.status(400).send({msg: "Campos obrigatórios do participante não preenchidos!"});
             }
             const sql = "insert into participante (nome, equipe, supervisao, sorteio_id, via_qr)values(?, ?, ?, ?, ?)";
-            con.query(sql, [nome, equipe, supervisao, sorteio_id, via_qr],(error,result)=>{
+            con.query(sql, [nome, equipe, supervisao, id_sorteio, via_qr],(error,result)=>{
             if(error) return res.status(500).send({erro: "Erro ao cadastrar participante", detalhes: error});
                 //(500) => erro de servidor.
                 res.status(201).send({msg: "Participante cadastrado com sucesso", id: result.insertId});
@@ -102,15 +134,15 @@ app.post("/participante",(req,res)=>{
         });
                 
 app.put("/participante/:id",(req,res)=>{
-    const{nome, equipe, supervisao, sorteio_id, via_qr} = req.body;
+    const{nome, equipe, supervisao, id_sorteio, via_qr} = req.body;
     const{id} = req.params;
     //verifica se todos os campos existentes na tabela participante foram preenchidos. 
-        if(!nome || !equipe || !supervisao || !sorteio_id || !via_qr){
+        if(!nome || !equipe || !supervisao || !id_sorteio || !via_qr){
             return res.status(400).send({ msg: "Campos obrigatórios do participante não preenchidos!"});
             }
             //atualização dos dados já existentes no banco de dados. 
-            const sql = "update participante set nome = ?, equipe = ?, supervisao = ?, sorteio_id = ?, via_qr = ? where id = ?";
-            con.query(sql, [nome, equipe, supervisao, sorteio_id, via_qr, id],(error,result)=>{
+            const sql = "update participante set nome = ?, equipe = ?, supervisao = ?, id_sorteio = ?, via_qr = ? where id = ?";
+            con.query(sql, [nome, equipe, supervisao, id_sorteio, via_qr, id],(error,result)=>{
             if(error) return res.status(500).send({erro: "Erro ao atualizar participante", detalhes: error});
             //(500) => erro de servidor.
             res.status(200).send({msg: "Participante atualizado com sucesso!", id});
@@ -179,7 +211,7 @@ app.put("/atualizar/sorteio/:id",(req,res)=>{
 app.delete("/apagar/sorteio/:id",(req,res)=>{
     con.query("delete from sorteio where id = ?",req.params.id,(error,result) =>{
         if(error) return res.status(500).send({ erro: `Erro ao apagar sorteio: ${error}`});
-        res.status(200).send({msg: 'Sorteio apagado',id:req.params.id}) 
+        res.status(200).send({msg: 'Sorteio apagado', id: req.params.id}) 
         //a porta (204) foi mudada para a porta (200) 
         //porque a porta 204 apaga o sorteio, mas não retorna informações
         //e a porta 200 apaga o sorteio e retorna com uuma resposta.
@@ -187,6 +219,156 @@ app.delete("/apagar/sorteio/:id",(req,res)=>{
     });
 });
 
+//criar novas 4 rotas para mobile, entra elas, a rota arquivo, para o pdf que seja possivel fazer o upload do PDF
+//onde não pode ser enviada como texto.
+
+//cadastrar usuario, adicionar uma rota pra que o participante possa se 
+//apagar do sorteio e listar sorteio.
+
+//ROTAS PARA MOBILE
+
+//Configuração do multer
+const storage = multer.diskStorage({
+    destination: function (req,file,cb){
+        cb(null, "uploads/"); //Certifica de que a pasta uploads/ existe
+    },
+    filename: function (req,file,cb){
+        cb(null, Date.now() + path.extname(file.originalname)); //nome único com extensão original
+    }
+});
+
+//filtro de tipos de arquivos aceitos (CSV, XLSX, e XLS)
+const upload = multer({
+    storage,
+    fileFilter: (req, file, cb) => {
+        const tiposAceitos = /csv|xlsx|xls/;
+        const extname = tiposAceitos.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = tiposAceitos.test(file.mimetype);
+
+        if (extname && mimetype) {
+            return cb(null, true);
+        } else {
+            cb(new Error("Apenas arquivos .csv ou Excel são permitidos!"));
+        }
+    }
+});
+
+//função para gerar o PDF com o resultado do sorteio
+function gerarPdfDoSorteio(sorteioResultados,res){
+    const doc = new PDFDocument();
+    const pdfPath = "uploads/resultados_sorteio.pdf";
+    doc.pipe(fs.createWriteStream(pdfPath));
+
+    //adiciona título do PDF
+    doc.fontSize(16).text("Resultados do Sorteio", {align: "center"});
+    doc.moveDown();
+
+    //adiciona os resultados do sorteio
+    sorteioResultados.forEach((resultado,index) => {
+        doc.text(`${index + 1}. ${JSON.stringify(resultado)}`);
+    });
+
+    //finaliza o PDF
+    doc.end();
+
+    //retorna o PDF gerado
+    doc.on('finish', () => {
+        res.status(200).send({ msg: "PDF gerado com sucesso!!", arquivo: pdfPath});
+    });
+}
+
+//Função para simular o sorteio e gerar o PDF
+function realizarSorteio(id_sorteio,res){
+    //simulando os resultados do sorteio
+    const sorteioResultados = [
+        { equipe: "Equipe Marcos", sorteio: Math.random() },
+        { equipe: "Equipe Kay", sorteio: Math.random() },
+        { equipe: "Equipe Lais", sorteio: Math.random() }
+    ];
+
+    //gerar o PDF com os resultados do sorteio
+    gerarPdfDoSorteio(sorteioResultados,res);
+}
+
+//Rota para MOBILE realizar o sorteio e gerar o PDF
+app.post("/realizar-sorteio/:id_sorteio",(req,res)=>{
+    const id_sorteio = req.params.id_sorteio;
+
+    //chama a função de realizar o sorteio e gerar o PDF
+    realizarSorteio(id_sorteio, res);
+});
+
+//rota de upload do arquivo PDF gerado
+app.post("/upload/arquivo/:id_sorteio", upload.single("arquivo"),(req,res)=>{
+    const id_sorteio = req.params.id_sorteio;
+    const nome_arquivo = req.file?.filename;
+
+    if (!nome_arquivo) {
+        return res.status(400).send({ erro: "Arquivo não enviado." });
+    }
+
+    const arquivoCaminho = path.join(__dirname, "uploads", nome_arquivo);
+
+    //aqui é realizado o processo de salvar o arquivo no banco ou outros passos necessários
+    const sql = "insert into arquivos(id_sorteio, nome_arquivo) values (?, ?)";
+    con.query(sql, [id_sorteio, nome_arquivo], (error, result) => {
+        if (error) return res.status(500).send({ erro: "Erro ao salvar o arquivo.", detalhes: error});
+        res.status(201).send({ msg: "Arquivo enviado com sucesso!", arquivo: nome_arquivo});
+    });
+});
+
+//Rota para cadastrar usuário no MOBILE
+
+app.post("/cadastrar/participante_mobile", async(req, res)=>{ //async transforma a função para lidar com ações assíncronas (que demoram). 
+    //ou seja, trata-se de uma função paciente com os resultados 
+    const {nome, email, senha} = req.body;
+    if (!nome || !email || !senha) {
+        return res.status(400).send({ msg: "Campos obrigatórios não preenchidos." });
+    }
+
+    try {
+        const senhaCriptografada = await bcrypt.hash(senha, 10);
+        //await espera o resultado antes de continuar pro próximo passo.
+        const sql = "insert into usuario (nome, email, senha) values (?, ?, ?)";
+        con.query(sql, [nome, email, senhaCriptografada], (error, result) => {
+            if (error) return res.status(500).send({ erro: "Erro ao cadastrar usuário.", detalhes: error});
+            res.status(201).send({ msg: "Usuário cadastrado com sucesso!", id: result.insertId});
+        });
+    } catch (err){
+        res.status(500).send({ erro: "Erro na criptografia da senha", detalhes: err});
+    }
+});
+
+app.delete("/remover/participante_mobile/:id", (req, res)=>{
+    const {id} = req.params;
+    const sql = "delete from participante_mobile where id = ?";
+    con.query(sql, [id], (error, result) => {
+        if(error) return res.status(500).send({ erro: "Erro ao remover participante", detalhes: error});
+        if(result.affectedRows === 0) {
+            return res.status(404).send({ msg: "Participante não encontrado"});
+        }
+        res.status(200).send({ msg: "Participante removido com sucesso!", id});
+    });
+});
+
+app.get("/listar/sorteio",(req, res)=>{
+    const sql = `
+        select s.id AS id_sorteio, s.nome_responsavel, s.status, s.data_criacao,
+               e.nome AS empresa_nome, e.data_sorteio, e.periodo
+        FROM sorteio s
+        JOIN empresa e ON s.empresa_id = e.id
+        ORDER BY s.data_criacao DESC
+    `;
+
+    con.query(sql,(error,result)=>{
+        if (error) return res.status(500).send({ erro: "Erro ao listar sorteios", detalhes: error});
+        res.status(200).send(result);
+    });
+});
+
+
 //inicializar servidor
 app.listen(3000,
     ()=>console.log("Servidor Online em http://127.0.0.1:3000"));
+
+
