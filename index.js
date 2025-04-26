@@ -1,5 +1,5 @@
-// Projeto: API da Roleta de Equipes.
-// Descrição: Backend desenvolvido com Node.js, Express e MySQL para gerenciar dados de participantes, empresas e sorteios.
+//Projeto: API da Roleta de Equipes.
+//Descrição: Backend desenvolvido com Node.js, Express e MySQL para gerenciar dados de participantes, empresas e sorteios.
 
 //será importada a biblioteca do node modules chamada "EXPRESS"
 // para criar nosso servidor backend da roleta.
@@ -20,7 +20,7 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
-// Verifica e cria a pasta uploads se não existir
+//verifica e cria a pasta uploads se não existir
 if (!fs.existsSync("uploads")) {
     fs.mkdirSync("uploads");
 }
@@ -116,50 +116,78 @@ app.get("/participante",(req,res)=>{
                 detalhes: error
             });
         });
-
 });
 
 app.post("/participante",(req,res)=>{
-    const{nome, equipe, supervisao, id_sorteio, via_qr} = req.body;
-        if(!nome || !equipe || !supervisao || !id_sorteio || !via_qr){
-            return res.status(400).send({msg: "Campos obrigatórios do participante não preenchidos!"});
-            }
-            const sql = "insert into participante (nome, equipe, supervisao, sorteio_id, via_qr)values(?, ?, ?, ?, ?)";
-            con.query(sql, [nome, equipe, supervisao, id_sorteio, via_qr],(error,result)=>{
-            if(error) return res.status(500).send({erro: "Erro ao cadastrar participante", detalhes: error});
-                //(500) => erro de servidor.
-                res.status(201).send({msg: "Participante cadastrado com sucesso", id: result.insertId});
-                //(201) => cadastrado com sucesso.
-            });
-        });
-                
-app.put("/participante/:id",(req,res)=>{
-    const{nome, equipe, supervisao, id_sorteio, via_qr} = req.body;
-    const{id} = req.params;
-    //verifica se todos os campos existentes na tabela participante foram preenchidos. 
-        if(!nome || !equipe || !supervisao || !id_sorteio || !via_qr){
-            return res.status(400).send({ msg: "Campos obrigatórios do participante não preenchidos!"});
-            }
-            //atualização dos dados já existentes no banco de dados. 
-            const sql = "update participante set nome = ?, equipe = ?, supervisao = ?, id_sorteio = ?, via_qr = ? where id = ?";
-            con.query(sql, [nome, equipe, supervisao, id_sorteio, via_qr, id],(error,result)=>{
-            if(error) return res.status(500).send({erro: "Erro ao atualizar participante", detalhes: error});
-            //(500) => erro de servidor.
-            res.status(200).send({msg: "Participante atualizado com sucesso!", id});
-            //(200) => atualizado com sucesso.
-            });
-        });  
-        
-app.delete("/participante/:id",(req,res)=>{
-    const{id} = req.params;
-    const sql = "delete from participante where id = ?";
-        con.query(sql, [id],(error,result)=>{
-            if(error) return res.status(500).send({erro: "Erro ao apagar participante", detalhes: error});
-            //(500) => erro de servidor.
-            res.status(200).send({msg: "Participante apagado com sucesso", id});
-            //(200) => apagado com sucesso.
-        });
+    console.log(req.body);
+    let {nome, equipe, supervisao, id_sorteio, via_qr} = req.body;
+
+    //define um valor padrão se via_qr não for enviado
+    if(typeof via_qr === "undefined"){
+        via_qr = false;
+    }
+
+    //verificação apenas dos campos obrigatórios
+    if(!nome || !equipe || !supervisao || !id_sorteio){
+        return res.status(400).send({ msg: "Campos obrigatórios do participante não preenchidos!"});
+    }
+
+    const sql = "insert into participante (nome, equipe, supervisao, id_sorteio, via_qr) VALUES (?, ?, ?, ?, ?)";
+    con.query(sql, [nome, equipe, supervisao, id_sorteio, via_qr], (error, result)=>{
+        if (error) {
+            return res.status(500).send({ erro: "Erro ao cadastrar participante", detalhes: error});
+        }
+        res.status(201).send({ msg: "Participante cadastrado com sucesso!", id: result.insertId});
     });
+});
+          
+app.put("/participante/:id",(req,res)=>{
+    const id = req.params.id;
+    let {nome, equipe, supervisao, via_qr, id_sorteio} = req.body;
+
+    //define um valor padrão se via_qr não for enviado
+    if(typeof via_qr === "undefined"){
+        via_qr = false;
+    }
+
+    //verificação apenas dos campos obrigatórios
+    if (!nome || !equipe || !supervisao || !id_sorteio){
+        return res.status(400).send({ msg: "Campos obrigatórios do participante não preenchidos!"});
+        //(400) => erro de requisição do participante por dados incompletos.
+    }
+
+    //atualização dos dados já existentes no banco de dados.
+    const updateQuery = `
+        UPDATE participante 
+        SET nome = ?, equipe = ?, supervisao = ?, via_qr = ?, id_sorteio = ? 
+        WHERE id_participante = ?
+    `;
+    con.query(updateQuery, [nome, equipe, supervisao, via_qr, id_sorteio, id], (err,result)=>{
+        if(err) return res.status(500).send({ erro: "Erro ao atualizar participante", detalhes: err});
+        //(500) => erro de servidor.
+
+        if(result.affectedRows === 0){
+            return res.status(404).send({ msg: "Participante não encontrado"});
+            //(404) => participante não encontrado.
+        }
+
+        res.status(200).send({ msg: "Participante atualizado com sucesso!"});
+        //(200) =>participante atualizado com sucesso.
+    });
+});
+
+app.delete("/participante/:id",(req, res)=>{
+    const {id} = req.params;
+    const sql = "delete from participante where id_participante = ?";
+
+    con.query(sql, [id], (error,result)=>{
+        if (error) return res.status(500).send({ erro: "Erro ao apagar participante", detalhes: error});
+           //(500) => participante não apagado.
+
+        res.status(200).send({ msg: "Participante apagado com sucesso", id});
+         //(200) =>participante apagado com sucesso.
+    });
+});
 
 //ROTAS DA EMPRESA
 app.post("/cadastrar/empresa",(req,res)=>{
@@ -170,23 +198,46 @@ app.post("/cadastrar/empresa",(req,res)=>{
     });
 });
 
-app.put("/atualizar/empresa/:id",(req,res)=>{
-    con.query("update empresa set ? where id = ?", [req.body, req.params.id],(error,result)=>{
-        if(error) return res.status(500).send({ erro: `Erro ao atualizar empresa: ${error}`});
-        res.status(200).send({ msg: "Empresa atualizada", id: req.params.id});
-        //se uma empresa que já existe no banco  de dados for atualizada com sucesso, 
+app.put("/empresa/:id",(req,res)=>{
+    const id = req.params.id;
+    const {nome, empreendimento, data_sorteio, periodo} = req.body;
+
+    //verifica se os campos obrigatórios estão preenchidos
+    if(!nome || !empreendimento || !data_sorteio || !periodo){
+        return res.status(400).send({ msg: "Campos obrigatórios da empresa não preenchidos!"});
+    }
+
+    //atualiza os dados da empresa com base no id_empresa
+    const sql = `
+        update empresa 
+        set nome = ?, empreendimento = ?, data_sorteio = ?, periodo = ?
+        id_empresa = ?
+    `;
+
+    con.query(sql, [nome, empreendimento, data_sorteio, periodo, id], (err,result)=>{
+        if(err) return res.status(500).send({ erro: "Erro ao atualizar empresa", detalhes: err});
+
+        if(result.affectedRows === 0){
+            return res.status(404).send({ msg: "Empresa não encontrada"});
+            //se empresa não encontrada, retorna com erro de usuário => 404.
+        }
+        res.status(200).send({ msg: "Empresa atualizada com sucesso!"});
+        //se uma empresa que já existe no banco de dados for atualizada com sucesso, 
         //retorna com (200) => empresa atualizada no banco de dados com sucesso.
-        //req.params.id => mostra o id da empresa que foi atualizada.
-        
-        
+        //req.params.id => mostra o id da empresa que foi atualizada. 
     });
 });
+           
+app.delete("/empresa/:id",(req,res)=>{
+    const {id} = req.params;
+    const sql = "delete from empresa where id_empresa = ?";
 
-app.delete("/apagar/empresa/:id",(req,res)=>{
-    con.query("delete from empresa where id = ?",req.params.id,(error,result)=>{
-        if(error) return res.status(500).send({ erro: `Erro ao apagar empresa: ${error}`});
-        res.status(204).send(); //se apagado com sucesso, retorna com (204) => operacação
-        //bem sucedida sem conteúdo para ser retornado.
+    con.query(sql, [id], (error,result)=>{
+        if (error) return res.status(500).send({ erro: "Erro ao tentar apagar empresa", detalhes: error});
+           //(500) => empresa não apagado.
+
+        res.status(200).send({ msg: "Sucesso ao apagar empresa", id});
+         //(200) =>empresa apagada com sucesso.
     });
 });
 
@@ -195,29 +246,65 @@ app.delete("/apagar/empresa/:id",(req,res)=>{
 app.post("/cadastrar/sorteio",(req,res)=>{
     con.query("insert into sorteio set ?", req.body,(error,result)=>{
         if(error) return res.status(500).send({ erro: `Erro ao cadastrar sorteio: ${error}`});
-        res.status(201).send({ msg: "Sorteio cadastrado", payload: result});
-        //(201) => novo sorteio cadastrado. 
+        res.status(201).send({ msg: "Sorteio cadastrado com sucesso!", payload: result});
+        //(201) => sorteio cadastrado com sucesso. 
     });
 });
 
-app.put("/atualizar/sorteio/:id",(req,res)=>{
-    con.query("update sorteio set ? where id = ?",[req.body, req.params.id], (error,result)=>{
-        if(error) return res.status(500).send({ erro: `Erro ao atualizar sorteio: ${error}`});
-        res.status(200).send({ msg: "Sorteio atualizado", id: req.params.id});
-        //(200) => sorteio atualizado.
+// Rota para atualizar um sorteio existente no banco de dados
+app.put("/sorteio/:id",(req,res)=>{
+    //pega o ID do sorteio pela URL
+    const id = req.params.id;
+
+    //desestrutura os campos do corpo da requisição
+    const {nome_responsavel, email_responsavel, senha_responsavel, data_criacao, status} = req.body;
+
+    // verificação básica dos campos obrigatórios
+    if(!nome_responsavel || !email_responsavel || !senha_responsavel || !data_criacao || !status){
+        return res.status(400).send({ msg: "Campos obrigatórios do sorteio não preenchidos!"});
+    }
+
+    //query SQL para atualizar o sorteio no banco
+    const sql = `
+        update sorteio
+        set nome_responsavel = ?, email_responsavel = ?, senha_responsavel = ?, data_criacao = ?, status = ?
+        where id = ?
+    `;
+
+    //executa a query no banco de dados
+    con.query(sql, [nome_responsavel, email_responsavel, senha_responsavel, data_criacao, status, id], (err,result)=>{
+        if(err){
+            //erro interno do servidor ao tentar atualizar
+            return res.status(500).send({ erro: "Erro ao atualizar sorteio, tente novamente", detalhes: err});
+        }
+
+        if (result.affectedRows === 0){
+            // sorteio não encontrado para atualizar
+            return res.status(404).send({ msg: "Sorteio não encontrado"});
+            //se sorteio não encontrado, ele responde com erro => (404).
+        }
+
+        //sucesso na atualização
+        res.status(200).send({ msg: "Sorteio atualizado com sucesso!"});
     });
 });
 
-app.delete("/apagar/sorteio/:id",(req,res)=>{
-    con.query("delete from sorteio where id = ?",req.params.id,(error,result) =>{
-        if(error) return res.status(500).send({ erro: `Erro ao apagar sorteio: ${error}`});
-        res.status(200).send({msg: 'Sorteio apagado', id: req.params.id}) 
+
+app.delete("/sorteio/:id",(req,res)=>{
+const {id} = req.params;
+const sql = "delete from sorteio where id = ?";
+        
+         con.query(sql, [id], (error,result)=>{
+        if (error) return res.status(500).send({ erro: "Erro ao tentar apagar sorteio", detalhes: error});
+        //(500) => empresa não apagado.
+        
+        res.status(200).send({ msg: "Sucesso ao apagar sorteio!", id});
+        //(200) =>empresa apagada com sucesso.
         //a porta (204) foi mudada para a porta (200) 
         //porque a porta 204 apaga o sorteio, mas não retorna informações
         //e a porta 200 apaga o sorteio e retorna com uuma resposta.
-        
-    });
-});
+            });
+        });
 
 //criar novas 4 rotas para mobile, entra elas, a rota arquivo, para o pdf que seja possivel fazer o upload do PDF
 //onde não pode ser enviada como texto.
@@ -365,7 +452,6 @@ app.get("/listar/sorteio",(req, res)=>{
         res.status(200).send(result);
     });
 });
-
 
 //inicializar servidor
 app.listen(3000,
