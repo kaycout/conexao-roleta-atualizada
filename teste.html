@@ -1,76 +1,62 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roleta de Equipes</title>
+    <title>Teste API - Roleta de Equipes</title>
 </head>
 <body>
-    <h1>Gerenciamento de Participantes, Empresas e Sorteios</h1>
+    <h1>Teste API Roleta de Equipes</h1>
 
-    <!-- Formulário para cadastrar participantes -->
     <h2>Cadastrar Participante</h2>
-    <form id="cadastroParticipante">
-        <input type="text" id="nome" placeholder="Nome" required>
-        <input type="text" id="equipe" placeholder="Equipe" required>
-        <input type="text" id="supervisao" placeholder="Supervisão" required>
-        <input type="number" id="id_sorteio" placeholder="ID Sorteio" required>
+    <form id="formParticipante">
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" name="nome" required><br><br>
+
+        <label for="equipe">Equipe:</label>
+        <input type="text" id="equipe" name="equipe" required><br><br>
+
+        <label for="supervisao">Supervisão:</label>
+        <input type="text" id="supervisao" name="supervisao" required><br><br>
+
+        <label for="id_sorteio">ID Sorteio:</label>
+        <input type="number" id="id_sorteio" name="id_sorteio" required><br><br>
+
+        <label for="via_qr">Via QR:</label>
+        <input type="checkbox" id="via_qr" name="via_qr"><br><br>
+
         <button type="submit">Cadastrar Participante</button>
     </form>
 
-    <!-- Exemplo de listagem de participantes -->
-    <h2>Participantes</h2>
-    <button id="listarParticipantes">Listar Participantes</button>
-    <div id="participantesList"></div>
-
     <script>
-        // Função para listar todos os participantes
-        document.getElementById('listarParticipantes').addEventListener('click', async()=>{
-            try {
-                const response = await fetch('http://localhost:3000/participante');
-                const data = await response.json();
-                const participantes = data.participante;
+        // Função para enviar dados para a API
+        document.getElementById("formParticipante").addEventListener("submit", function(e){
+            e.preventDefault();
 
-                let html = "<ul>";
-                participantes.forEach(participante => {
-                    html += `<li>${participante.nome} - ${participante.equipe} - ${participante.supervisao}</li>`;
-                });
-                html += "</ul>";
-                document.getElementById('participantesList').innerHTML = html;
-            } catch (error) {
-                console.error('Erro ao listar participantes:', error);
-            }
-        });
+            const participante ={
+                nome: document.getElementById("nome").value,
+                equipe: document.getElementById("equipe").value,
+                supervisao: document.getElementById("supervisao").value,
+                id_sorteio: document.getElementById("id_sorteio").value,
+                via_qr: document.getElementById("via_qr").checked
+            };
 
-        // Função para cadastrar um participante
-        document.getElementById('cadastroParticipante').addEventListener('submit', async (event)=>{
-            event.preventDefault();
-
-            const nome = document.getElementById('nome').value;
-            const equipe = document.getElementById('equipe').value;
-            const supervisao = document.getElementById('supervisao').value;
-            const id_sorteio = document.getElementById('id_sorteio').value;
-            const via_qr = document.getElementById('via_qr').value;
-
-            const novoParticipante = {nome, equipe, supervisao, id_sorteio, via_qr};
-
-            try {
-                const response = await fetch('http://localhost:3000/participante',{
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(novoParticipante)
-                });
-
-                const result = await response.json();
-                alert(result.msg);  // Mensagem de sucesso
-
-                // Limpar campos após o cadastro
-                document.getElementById('cadastroParticipante').reset();
-            } catch (error) {
-                console.error('Erro ao cadastrar participante:', error);
-            }
+            fetch('http://localhost:3000/participante',{
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(participante)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Participante cadastrado com sucesso!');
+                console.log(data);
+            })
+            .catch(error => {
+                alert('Erro ao cadastrar participante!');
+                console.error('Error:', error);
+            });
         });
     </script>
 </body>
