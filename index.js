@@ -21,7 +21,7 @@ const path = require("path");
 const fs = require("fs");
 
 //verifica e cria a pasta uploads se não existir
-if (!fs.existsSync("uploads")) {
+if (!fs.existsSync("uploads")){
     fs.mkdirSync("uploads");
 }
 
@@ -132,7 +132,7 @@ app.post("/participante",(req,res)=>{
         return res.status(400).send({ msg: "Campos obrigatórios do participante não preenchidos!"});
     }
 
-    const sql = "insert into participante (nome, equipe, supervisao, id_sorteio, via_qr) VALUES (?, ?, ?, ?, ?)";
+    const sql = "insert into participante (nome, equipe, supervisao, id_sorteio, via_qr) values (?, ?, ?, ?, ?)";
     con.query(sql, [nome, equipe, supervisao, id_sorteio, via_qr], (error, result)=>{
         if (error) {
             return res.status(500).send({ erro: "Erro ao cadastrar participante", detalhes: error});
@@ -158,9 +158,9 @@ app.put("/participante/:id",(req,res)=>{
 
     //atualização dos dados já existentes no banco de dados.
     const updateQuery = `
-        UPDATE participante 
-        SET nome = ?, equipe = ?, supervisao = ?, via_qr = ?, id_sorteio = ? 
-        WHERE id_participante = ?
+        update participante 
+        set nome = ?, equipe = ?, supervisao = ?, via_qr = ?, id_sorteio = ? 
+        where id_participante = ?
     `;
     con.query(updateQuery, [nome, equipe, supervisao, via_qr, id_sorteio, id], (err,result)=>{
         if(err) return res.status(500).send({ erro: "Erro ao atualizar participante", detalhes: err});
@@ -327,12 +327,12 @@ const storage = multer.diskStorage({
 //filtro de tipos de arquivos aceitos (CSV, XLSX, e XLS)
 const upload = multer({
     storage,
-    fileFilter: (req, file, cb) => {
+    fileFilter: (req,file,cb)=>{
         const tiposAceitos = /csv|xlsx|xls/;
         const extname = tiposAceitos.test(path.extname(file.originalname).toLowerCase());
         const mimetype = tiposAceitos.test(file.mimetype);
 
-        if (extname && mimetype) {
+        if (extname && mimetype){
             return cb(null, true);
         } else {
             cb(new Error("Apenas arquivos .csv ou Excel são permitidos!"));
@@ -342,27 +342,38 @@ const upload = multer({
 
 //função para gerar o PDF com o resultado do sorteio
 function gerarPdfDoSorteio(sorteioResultados,res){
+    const pdfPath = path.join(__dirname, "uploads", "resultados_sorteio.pdf");
+    
     const doc = new PDFDocument();
-    const pdfPath = "uploads/resultados_sorteio.pdf";
-    doc.pipe(fs.createWriteStream(pdfPath));
+    const writeStream = fs.createWriteStream(pdfPath);
+
+    doc.pipe(writeStream);
 
     //adiciona título do PDF
-    doc.fontSize(16).text("Resultados do Sorteio", {align: "center"});
+    doc.fontSize(16).text("Resultados do Sorteio",{align: "center"});
     doc.moveDown();
 
     //adiciona os resultados do sorteio
-    sorteioResultados.forEach((resultado,index) => {
+    sorteioResultados.forEach((resultado,index)=>{
         doc.text(`${index + 1}. ${JSON.stringify(resultado)}`);
     });
 
     //finaliza o PDF
     doc.end();
 
-    //retorna o PDF gerado
-    doc.on('finish', () => {
-        res.status(200).send({ msg: "PDF gerado com sucesso!!", arquivo: pdfPath});
+    //responde apenas depois que o PDF terminar de salvar
+    writeStream.on('finish',()=>{
+        res.status(200).send({
+            msg: "PDF gerado com sucesso!!",
+            arquivo: "uploads/resultados_sorteio.pdf"
+        });
+    });
+
+    writeStream.on('error',(err)=>{
+        res.status(500).send({ erro: "Erro ao gerar PDF", detalhes: err});
     });
 }
+
 
 //Função para simular o sorteio e gerar o PDF
 function realizarSorteio(id_sorteio,res){
@@ -404,6 +415,17 @@ app.post("/upload/arquivo/:id_sorteio", upload.single("arquivo"),(req,res)=>{
     });
 });
 
+//Rota para listar todos os participantes do MOBILE
+app.get("/listar/participante_mobile", (req, res)=>{
+    const sql = "select * from participante_mobile";
+    con.query(sql, (error,result)=>{
+        if (error) {
+            return res.status(500).send({erro: "Participantes.não encontrados", detalhes: error});
+        }
+        res.status(200).send(result);
+    });
+});
+
 //Rota para cadastrar usuário no MOBILE
 
 app.post("/cadastrar/participante_mobile", async(req, res)=>{ //async transforma a função para lidar com ações assíncronas (que demoram). 
@@ -416,10 +438,10 @@ app.post("/cadastrar/participante_mobile", async(req, res)=>{ //async transforma
     try {
         const senhaCriptografada = await bcrypt.hash(senha, 10);
         //await espera o resultado antes de continuar pro próximo passo.
-        const sql = "insert into usuario (nome, email, senha) values (?, ?, ?)";
+        const sql = "insert into participante_mobile(nome, email, senha) values (?, ?, ?)";
         con.query(sql, [nome, email, senhaCriptografada], (error, result) => {
-            if (error) return res.status(500).send({ erro: "Erro ao cadastrar usuário.", detalhes: error});
-            res.status(201).send({ msg: "Usuário cadastrado com sucesso!", id: result.insertId});
+            if (error) return res.status(500).send({ erro: "Erro ao cadastrar participante.", detalhes: error});
+            res.status(201).send({ msg: "Participante cadastrado com sucesso!", id: result.insertId});
         });
     } catch (err){
         res.status(500).send({ erro: "Erro na criptografia da senha", detalhes: err});
@@ -428,23 +450,23 @@ app.post("/cadastrar/participante_mobile", async(req, res)=>{ //async transforma
 
 app.delete("/remover/participante_mobile/:id", (req, res)=>{
     const {id} = req.params;
-    const sql = "delete from participante_mobile where id = ?";
-    con.query(sql, [id], (error, result) => {
+    const sql = "delete from participante_mobile where id_participante_mobile = ?";
+    con.query(sql, [id], (error, result)=>{
         if(error) return res.status(500).send({ erro: "Erro ao remover participante", detalhes: error});
-        if(result.affectedRows === 0) {
+        if(result.affectedRows === 0){
             return res.status(404).send({ msg: "Participante não encontrado"});
         }
-        res.status(200).send({ msg: "Participante removido com sucesso!", id});
+        res.status(200).send({ msg: "Participante removido com sucesso!"});
     });
 });
 
 app.get("/listar/sorteio",(req, res)=>{
     const sql = `
-        select s.id AS id_sorteio, s.nome_responsavel, s.status, s.data_criacao,
-               e.nome AS empresa_nome, e.data_sorteio, e.periodo
-        FROM sorteio s
-        JOIN empresa e ON s.empresa_id = e.id
-        ORDER BY s.data_criacao DESC
+    select s.id AS id_sorteio, s.nome_responsavel, s.status, s.data_criacao,
+    e.nome AS empresa_nome, e.data_sorteio, e.periodo
+    from sorteio s
+    join empresa e ON s.id_empresa = e.id_empresa
+    order by s.data_criacao DESC;
     `;
 
     con.query(sql,(error,result)=>{
