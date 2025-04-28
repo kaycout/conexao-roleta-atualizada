@@ -1,6 +1,5 @@
 # API Roleta de Equipes
-
-API backend desenvolvida utilizando **Node.js**, **Express** e **MySQL** para gerenciar dados de participantes, empresas e sorteios. O objetivo principal é automatizar e organizar o processo de sorteio de equipes.
+API backend desenvolvida utilizando **Node.js**, **Express** e **MySQL** para gerenciar dados de participantes, empresas e sorteios. O objetivo principal é automatizar, facilitar e organizar o processo de sorteio de equipes de vendas.
 
 ## Tecnologias Utilizadas
 
@@ -39,4 +38,16 @@ A API fornece as seguintes funcionalidades:
   
 ### **Uploads de Arquivos**
 
-- **Upload de CSV/XLSX**: Permite o upload de arquivos CSV e Excel com dados dos participantes.
+- **Upload de CSV/XLSX**:
+- POST /upload
+- Permite o upload de arquivos CSV e Excel com dados dos participantes para serem importados
+automaticamente para o sistema.
+
+
+# 🛠️ Estrutura de Banco de Dados (Resumo)
+- participante: nome, equipe, supervisao, id_sorteio, via_qr.
+- empresa: id_empresa, empresa, data_sorteio, periodo.
+- sorteio: id, nome_responsavel, email_responsavel, senha_responsavel, data_criacao, status, etc.
+
+## 👩‍💻 Desenvolvido por
+Kaylane Coutinho.
