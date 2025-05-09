@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste API - Roleta de Equipes</title>
+</head>
+<body>
+    <h1>Teste API Roleta de Equipes</h1>
+
+    <h2>Cadastrar Participante</h2>
+    <form id="formParticipante">
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" name="nome" required><br><br>
+
+        <label for="equipe">Equipe:</label>
+        <input type="text" id="equipe" name="equipe" required><br><br>
+
+        <label for="supervisao">Supervisão:</label>
+        <input type="text" id="supervisao" name="supervisao" required><br><br>
+
+        <label for="id_sorteio">ID Sorteio:</label>
+        <input type="number" id="id_sorteio" name="id_sorteio" required><br><br>
+
+        <label for="via_qr">Via QR:</label>
+        <input type="checkbox" id="via_qr" name="via_qr"><br><br>
+
+        <button type="submit">Cadastrar Participante</button>
+    </form>
+
+    <script>
+        // Função para enviar dados para a API
+        document.getElementById("formParticipante").addEventListener("submit", function(e){
+            e.preventDefault();
+
+            const participante ={
+                nome: document.getElementById("nome").value,
+                equipe: document.getElementById("equipe").value,
+                supervisao: document.getElementById("supervisao").value,
+                id_sorteio: document.getElementById("id_sorteio").value,
+                via_qr: document.getElementById("via_qr").checked
+            };
+
+            fetch('http://localhost:3000/participante',{
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(participante)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Participante cadastrado com sucesso!');
+                console.log(data);
+            })
+            .catch(error => {
+                alert('Erro ao cadastrar participante!');
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
