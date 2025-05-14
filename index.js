@@ -77,41 +77,36 @@ con.connect((err) => {
 
 //ROTA DOS PARTICIPANTES
 
-//rota para listar todos os dados dos participantes, sorteio e empresa.
-app.get("/participante",(req,res)=>{
-    const consultas = [
-        new Promise((resolve, reject)=>{ //se trata de uma promessa, e ela verifica se está tudo certo  
-            //no banco de dados, e, com o reject é retornado uma resposta.
-            con.query("select * from participante", (error,result)=>{
-                if(error) reject({ participante: error});
+  app.get('/participante',(req,res)=>{
+    const consultas =[
+        new Promise((resolve, reject)=>{
+            con.query("SELECT * FROM participante", (error, result)=>{
+                if (error) reject({ participante: error});
                 else resolve({ participante: result});
             });
         }),
-        new Promise((resolve, reject) => {
-            con.query("Select * from sorteio", (error,result)=>{
-                if(error) reject({ sorteio: error});
+        new Promise((resolve, reject)=>{
+            con.query("SELECT * FROM sorteio", (error, result)=>{
+                if (error) reject({ sorteio: error});
                 else resolve({ sorteio: result});
             });
         }),
-        new Promise((resolve, reject) => {
-            con.query("Select * from empresa", (error,result)=>{
-                if(error) reject({ empresa: error});
+        new Promise((resolve, reject)=>{
+            con.query("SELECT * FROM empresa", (error, result)=>{
+                if (error) reject({ empresa: error});
                 else resolve({ empresa: result});
             });
         })
     ];
 
     Promise.all(consultas)
-    //o Promise.all recebe as promises (consultas ao banco)
-    //e ele aguarda todas serem resolvidas com sucesso
-    //e então retorna os resultados.
-    //caso aconteça de qualquer uma das promises falhar, o .catch é acionado.
-        .then(resultados=>{
+        .then(resultados =>{
             const dadosCompletos = Object.assign({}, ...resultados);
-            res.status(200).send(dadosCompletos); //entrega os dados com sucesso.
+            res.status(200).send({ msg: dadosCompletos.participante }); //manda só os participantes aqui
         })
         .catch(error=>{
-            res.status(500).send({ //se erro na consulta, retorna com (500) erro interno. 
+            console.error("Erro ao buscar dados:",error);// log pra debug
+            res.status(500).send({
                 erro: "Erro ao buscar dados",
                 detalhes: error
             });
