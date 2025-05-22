@@ -21,52 +21,52 @@ API backend desenvolvida em **Node.js**, **Express** e **MySQL** para gerenciar 
 
 ### Participantes
 
-- **Listar** — `GET /participantes`  
+- **Listar** — GET /participante
   Lista todos os participantes cadastrados no sistema.
 
-- **Cadastrar** — `POST /participantes`  
+- **Cadastrar** — POST /participante
   Permite cadastrar um novo participante no sorteio.
 
-- **Atualizar** — `PUT /participantes/:id`  
+- **Atualizar** — PUT /participante/:id  
   Atualiza os dados de um participante específico.
 
-- **Deletar** — `DELETE /participantes/:id`  
+- **Deletar** — DELETE /participante/:id  
   Remove um participante do sistema.
 
 ---
 
 ### Empresas
 
-- **Cadastrar** — `POST /empresas`  
+- **Cadastrar** — POST /empresa
   Permite o cadastro de novas empresas.
 
-- **Atualizar** — `PUT /empresas/:id`  
+- **Atualizar** — PUT /empresa/:id  
   Atualiza informações de uma empresa existente.
 
-- **Deletar** — `DELETE /empresas/:id`  
+- **Deletar** — DELETE /empresa/:id
   Remove uma empresa do sistema.
 
 ---
 
 ### Sorteios
 
-- **Cadastrar** — `POST /sorteios`  
+- **Cadastrar** — `POST /sorteio  
   Cadastra um novo sorteio.
 
-- **Atualizar** — `PUT /sorteios/:id`  
+- **Atualizar** — PUT /sorteio/:id 
   Atualiza dados do sorteio.
 
-- **Deletar** — `DELETE /sorteios/:id`  
+- **Deletar** — DELETE /sorteio/:id  
   Remove um sorteio.
 
-- **Gerar PDF** — `GET /sorteios/:id/pdf`  
+- **Gerar PDF** — GET /sorteio/:id/pdf
   Gera um arquivo PDF com os resultados do sorteio.
 
 ---
 
 ### Uploads de Arquivos
 
-- **Upload CSV/XLSX** — `POST /upload`  
+- **Upload CSV/XLSX** — POST /upload  
   Permite o upload de arquivos CSV e Excel contendo dados de participantes para importação automática.
 
 ---
@@ -75,9 +75,9 @@ API backend desenvolvida em **Node.js**, **Express** e **MySQL** para gerenciar 
 
 | Tabela        | Principais Campos                                         | Descrição                             |
 |---------------|----------------------------------------------------------|-------------------------------------|
-| `participante` | `id`, `nome`, `equipe`, `supervisao`, `id_sorteio`, `via_qr` | Dados dos participantes e associação ao sorteio. |
-| `empresa`     | `id_empresa`, `empresa`, `data_sorteio`, `periodo`       | Informações das empresas participantes.           |
-| `sorteio`     | `id`, `nome_responsavel`, `email_responsavel`, `senha_responsavel`, `data_criacao`, `status` | Dados e status dos sorteios.          |
+| participante | id, nome, equipe, supervisao, id_sorteio, via_qr | Dados dos participantes e associação ao sorteio. |
+| empresa    | id_empresa, empresa, data_sorteio, periodo      | Informações das empresas participantes.           |
+| sorteio     | id, nome_responsavel, email_responsavel, senha_responsavel, data_criacao, status | Dados e status dos sorteios.          |
 
 ---
 
