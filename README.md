@@ -22,15 +22,19 @@ API backend desenvolvida em **Node.js**, **Express** e **MySQL** para gerenciar 
 ### Participantes
 
 - **Listar** — GET /participante
+
   Lista todos os participantes cadastrados no sistema.
 
 - **Cadastrar** — POST /participante
+
   Permite cadastrar um novo participante no sorteio.
 
-- **Atualizar** — PUT /participante/:id  
+- **Atualizar** — PUT /participante/:id 
+
   Atualiza os dados de um participante específico.
 
-- **Deletar** — DELETE /participante/:id  
+- **Deletar** — DELETE /participante/:id 
+
   Remove um participante do sistema.
 
 ---
@@ -38,28 +42,35 @@ API backend desenvolvida em **Node.js**, **Express** e **MySQL** para gerenciar 
 ### Empresas
 
 - **Cadastrar** — POST /empresa
+
   Permite o cadastro de novas empresas.
 
 - **Atualizar** — PUT /empresa/:id  
+
   Atualiza informações de uma empresa existente.
 
 - **Deletar** — DELETE /empresa/:id
+
   Remove uma empresa do sistema.
 
 ---
 
 ### Sorteios
 
-- **Cadastrar** — `POST /sorteio  
+- **Cadastrar** — POST /sorteio 
+
   Cadastra um novo sorteio.
 
 - **Atualizar** — PUT /sorteio/:id 
+
   Atualiza dados do sorteio.
 
-- **Deletar** — DELETE /sorteio/:id  
+- **Deletar** — DELETE /sorteio/:id 
+
   Remove um sorteio.
 
 - **Gerar PDF** — GET /sorteio/:id/pdf
+
   Gera um arquivo PDF com os resultados do sorteio.
 
 ---
@@ -67,13 +78,14 @@ API backend desenvolvida em **Node.js**, **Express** e **MySQL** para gerenciar 
 ### Uploads de Arquivos
 
 - **Upload CSV/XLSX** — POST /upload  
+
   Permite o upload de arquivos CSV e Excel contendo dados de participantes para importação automática.
 
 ---
 
 ## Estrutura do Banco de Dados (Resumo)
 
-| Tabela        | Principais Campos                                         | Descrição                             |
+| Tabelas        | Principais campos adicionados                                        | Descrição das tabelas                            |
 |---------------|----------------------------------------------------------|-------------------------------------|
 | participante | id, nome, equipe, supervisao, id_sorteio, via_qr | Dados dos participantes e associação ao sorteio. |
 | empresa    | id_empresa, empresa, data_sorteio, periodo      | Informações das empresas participantes.           |
