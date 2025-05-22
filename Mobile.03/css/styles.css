@@ -1,0 +1,117 @@
+
+/* ESTILO DA PÁGINA INDEX */
+
+/* Estilo do cabeçalho */
+#cabecalho-dados {
+  background-color: #cbcfd3;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+#cabecalho-dados h2 {
+  color: #0a000a;
+  margin-bottom: 10px;
+}
+
+body {
+  padding: 20px;
+  background-color: #f8f9fa;
+}
+
+.titulo {
+  color: #0d6efd;
+  margin: 20px 0;
+  text-align: center;
+}
+
+.info-text {
+  font-style: Arial;
+  color: #6c757d;
+  margin-bottom: 15px;
+}
+
+.form-container {
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
+
+
+
+.btn-custom {
+  width: 100%;
+  margin-top: 15px;
+}
+
+
+/* Estilo para os alerts */
+.alert {
+  position: relative;
+  padding: 1rem 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  animation: slideIn 0.3s ease-out;
+}
+
+.alert-success {
+  color: #0f5132;
+  background-color: #d1e7dd;
+  border-color: #badbcc;
+}
+
+.alert-error {
+  color: rgb(192, 42, 42);
+  background-color: #f8d7da;
+  border-color: #f5c2c7;
+}
+
+@keyframes slideIn {
+  from {
+      transform: translateY(-20px);
+      opacity: 0;
+  }
+  to {
+      transform: translateY(0);
+      opacity: 1;
+  }
+}
+
+/* Modo Escuro */
+[data-theme="dark"] body {
+  background-color: #121212; /* Preto quase puro */
+  color: #e9ecef; /* Cinza muito claro */
+}
+
+[data-theme="dark"] .form-container,
+[data-theme="dark"] .card {
+  background-color: #1e1e1e; /* Cinza escuro */
+}
+
+
+/* Responsividade */
+@media (max-width: 768px) {
+  /* Estilo para smartphone/tablet */
+  .titulo {
+      font-size: 1.5rem;
+  }
+  
+  .form-label {
+      font-weight: 500;
+  }
+  
+  /* Alerts em smartphone/tablet */
+  .alert {
+      font-size: 0.9rem;
+      padding: 0.75rem;
+  }
+}
+
+
+
+
+
+

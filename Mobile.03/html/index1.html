@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sorteador de Lista</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="../css/styles.css"/>
+</head>
+<body>
+      
+  <div class="container">
+    <!-- Cabeçalho -->
+    <header>
+      <h1 class="titulo">Sorteador de Lista</h1>
+    </header>
+
+    <!-- Cabeçalho com dados da empresa -->
+    <div id="cabecalho-dados" class="margin botton-4">
+      <div class="text">
+        <div class="spinner" role="status"></div>
+        <p class="texto-carregar">Carregando informações da empresa. Aguarde!...</p>
+      </div>
+    </div>
+
+    <!-- Formulário -->
+    <div class="form-container">
+      <form id="cadastroForm">
+        <div class="mb-3">
+          <label for="nome" class="form-label">Nome:</label>
+          <input type="text" class="form-control" id="nome" placeholder="Digite seu nome" required />
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label">Email:</label>
+          <input type="text" class="form-control" id="email" placeholder="Digite seu email" required />
+        </div>
+        <div class="mb-3">
+          <label for="senha" class="form-label">Senha:</label>
+          <input type="password" class="form-control" id="senha" placeholder="Digite sua senha" required />
+        </div>
+        <button type="submit" class="btn btn-primary btn-custom w-100">Enviar</button>
+        <button type="reset" class="btn btn-primary btn-custom">Apagar</button>
+      </form>
+    </div>
+
+    <!-- Modal de sucesso -->
+    <div class="modal fade" id="successModal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Sucesso!</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">Dados enviados com sucesso!</div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  
+<script src="../script/formulario.js"></script>
+
+
+    </body>
+</html>
