@@ -21,6 +21,9 @@ API backend desenvolvida em **Node.js**, **Express** e **MySQL** para gerenciar 
 
 ### Participantes
 
+
+<img src="rota1.png" width=1000>
+
 - **Listar** — GET /participante
 
   Lista todos os participantes cadastrados no sistema.
@@ -41,6 +44,8 @@ API backend desenvolvida em **Node.js**, **Express** e **MySQL** para gerenciar 
 
 ### Empresas
 
+<img src="rota2.png" width=1000>
+
 - **Cadastrar** — POST /empresa
 
   Permite o cadastro de novas empresas.
@@ -56,6 +61,9 @@ API backend desenvolvida em **Node.js**, **Express** e **MySQL** para gerenciar 
 ---
 
 ### Sorteios
+
+
+<img src="rota3.png" width=1000>
 
 - **Cadastrar** — POST /sorteio 
 
