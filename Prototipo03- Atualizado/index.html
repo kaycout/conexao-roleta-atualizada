@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorteador de Lista</title>
+    
+    <!-- ✅ Favicon corrigido para um ícone genérico funcional -->
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/295/295128.png" type="image/png">
+    
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Bibliotecas para PDF e QRCode -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+    <!-- Topo fixo com campos do sorteio -->
+    <div id="topo-fixo">
+        <label>Empresa: <input type="text" id="empresa"></label>
+        <label>Empreend/Loja/Dep: <input type="text" id="empreendimento"></label>
+        <label>Data: <input type="date" id="data"></label>
+        <label>Período:
+            <input type="radio" name="periodo" value="Manhã"> Manhã
+            <input type="radio" name="periodo" value="Tarde"> Tarde
+            <input type="radio" name="periodo" value="Integral"> Integral
+        </label>
+        <button onclick="criarRoleta()">Criar Roleta</button>
+    </div>
+
+    <!-- Conteúdo principal -->
+    <div id="conteudo">
+        <!-- Lista original -->
+        <div class="coluna">
+            <h3>Lista Original</h3>
+            <table id="tabelaOriginal">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nome</th>
+                        <th>Equipe</th>
+                        <th>Supervisão</th>
+                        <th>Remover</th>
+                    </tr>
+                </thead>
+                <tbody id="listaOriginal"></tbody>
+            </table>
+        </div>
+
+        <!-- Área central com formulário e QR Code -->
+        <div class="coluna" id="centro-fixo">
+            <div id="participantes">
+                <label><br>Nome: <input type="text" id="nome" placeholder="Digite seu nome"></label><br>
+                <label>Equipe: <input type="text" id="equipe" placeholder="Qual a sua equipe?"></label><br>
+                <label>Supervisão: <input type="text" id="supervisao" placeholder="Informe sua supervisão"></label><br>
+                <button onclick="adicionar()">Adicionar</button>
+            </div><br>
+
+            <!-- ✅ Aqui o QR Code será injetado via JavaScript -->
+            <div id="qr-code-container"></div>
+
+            <button class="btn-sortear" onclick="sortear()">Sortear</button>
+            <div id="contador" class="contador">5</div>
+        </div>
+
+        <!-- Lista sorteada -->
+        <div class="coluna">
+            <h3>Lista Sorteada</h3>
+            <table id="tabelaSorteada">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nome</th>
+                        <th>Equipe</th>
+                        <th>Supervisão</th>
+                    </tr>
+                </thead>
+                <tbody id="listaSorteada"></tbody>
+            </table>
+            <button class="salvar-pdf" onclick="salvarPDF()">Salvar como PDF</button>
+        </div>
+    </div>
+
+    <!-- Script principal (após o DOM) -->
+    <script src="script.js"></script>
+
+    <!-- Rodapé -->
+    <footer>
+        <div class="banner" id="anuncio"></div>
+        <h1>ANÚNCIO AQUI</h1>
+    </footer>
+</body>
+</html>
