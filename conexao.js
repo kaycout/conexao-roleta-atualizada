@@ -1,4 +1,3 @@
-
 // Elementos
 const container = document.getElementById("container");
 const cad = document.getElementById("cadastro");
@@ -6,13 +5,13 @@ cad.onclick = () => {
   document.getElementById("form").style.display = "block";
 };
 
-//participantes
+// ===== PARTICIPANTES =====
 function carregarParticipantes() {
   fetch("http://127.0.0.1:3000/listar_participante")
     .then(res => res.json())
     .then(dados => {
       let saida = "";
-      dados.msg.map(list_part=> {
+      dados.msg.map(list_part => {
         saida += `
           <div class="participante">
             <p>Id: ${list_part.id}</p>
@@ -50,7 +49,7 @@ function cadastrarParticipante() {
     .catch(error => console.log(`Erro ao executar a API: ${error}`));
 }
 
-// participantes mobile
+// ===== PARTICIPANTES MOBILE =====
 function carregarParticipantesMobile() {
   fetch("http://127.0.0.1:3000/listarparticipante_mobile")
     .then(res => res.json())
@@ -142,7 +141,7 @@ function cadastrarEmpresa() {
     .catch(error => console.log(`Erro ao executar a API: ${error}`));
 }
 
-// sorteios
+// ===== SORTEIOS =====
 function carregarSorteios() {
   fetch("http://127.0.0.1:3000/listar_sorteio")
     .then(res => res.json())
@@ -199,6 +198,8 @@ function realizarSorteio() {
     })
     .catch(error => console.log(`Erro ao executar a API: ${error}`));
 }
+
+// ===== CRIAR ROLETA =====
 function criarRoleta() {
   const empresa = document.getElementById("empresa").value;
   const empreendimento = document.getElementById("empreendimento").value;
@@ -222,5 +223,3 @@ function criarRoleta() {
     console.error("Erro ao criar sorteio:", err);
   });
 }
-
-

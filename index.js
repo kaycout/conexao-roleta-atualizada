@@ -1,3 +1,4 @@
+
 //Projeto: API da Roleta de Equipes.
 //Descrição: Backend desenvolvido com Node.js, Express e MySQL para gerenciar dados de participantes, empresas e sorteios.
 
