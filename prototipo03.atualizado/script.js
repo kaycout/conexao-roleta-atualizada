@@ -14,6 +14,7 @@ let idSorteio=0
 let sorteioRealizado = false;
 //let roletaCriada = false;
 
+
 /* Fazendo o sistema entender que maiúsculas e minúsculas são iguais.
     Também é desconsiderado acentos e ç. A idéia aqui é evitar duplicidade de nomes. */
 function normalizarTexto(texto) {
@@ -42,9 +43,10 @@ function criarRoleta() {
         alert("Todos os campos devem ser preenchidos para continuar.");   
         return;
     }
+  
     document.getElementById("qr-code-container").innerHTML = "";
     new QRCode(document.getElementById("qr-code-container"), {
-    text: "http://192.168.17.143/mobile.03.atualizado/html/", // link real da versão mobile
+    text: `http://192.168.17.143/mobile.03.atualizado/html/index.html?id_sorteio=${idSorteio}&empresa=${encodeURIComponent(empresa)}&empreendimento=${encodeURIComponent(empreendimento)}&data=${data}&periodo=${encodeURIComponent(periodo.value)}`, // link real da versão mobile
     width: 150,
     height: 150
 });
@@ -256,3 +258,4 @@ function sortearRoleta(participantes) {
 const lista = ["Maria", "João", "Ana", "Pedro"];
 const resultado = sortearRoleta(lista);
 console.log(resultado);
+
