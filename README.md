@@ -77,7 +77,7 @@ API backend desenvolvida em **Node.js**, **Express** e **MySQL** para gerenciar 
 ### Participantes
 
 
-<img src="rota1.png" width=1000>
+<img src="participantes.png" width=1000>
 
 - **Listar** — GET /participante
 
@@ -99,7 +99,7 @@ API backend desenvolvida em **Node.js**, **Express** e **MySQL** para gerenciar 
 
 ### Empresas
 
-<img src="rota2.png" width=1000>
+<img src="empresas.png" width=1000>
 
 - **Cadastrar** — POST /empresa
 
@@ -118,7 +118,7 @@ API backend desenvolvida em **Node.js**, **Express** e **MySQL** para gerenciar 
 ### Sorteios
 
 
-<img src="rota3.png" width=1000>
+<img src="sorteios.png" width=1000>
 
 - **Cadastrar** — POST /sorteio 
 
