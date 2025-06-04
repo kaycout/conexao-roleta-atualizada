@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const retryButton = document.getElementById('retry-button');
     
-    const fallbackURL = '.../html/index1.html'; 
+    const fallbackURL = '.../html/index.html'; 
 
     // Botão "Tentar novamente"
     retryButton.addEventListener('click', function() {

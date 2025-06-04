@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const API_URL = `http://localhost:3000/realizar_sorteio/${id_sorteio}?nome=${encodeURIComponent(nomeUsuario)}`;
 
-  const mensagemCompleta = document.getElementById('mensagemCompleta'); // Ajuste o seletor conforme seu HTML
+  const posicaoSpan = document.getElementById('posicao-sorteada'); // Ajuste o seletor conforme seu HTML
   const btnSalvar = document.getElementById('btnSalvar'); // Ajuste o seletor conforme seu HTML
   const btnSair = document.getElementById('btnSair'); // Ajuste o seletor conforme seu HTML
 
@@ -43,11 +43,14 @@ document.addEventListener('DOMContentLoaded', () => {
         posicaoSorteada = participanteEncontrado.ordem; // salva posição
       }
 
-      if (mensagemCompleta) {
-        mensagemCompleta.innerHTML = participanteEncontrado
-          ? `🎉 Você está na posição <strong>${participanteEncontrado.ordem}</strong>. Boa sorte!`
-          : `<span class="text-danger">Participante não encontrado.</span>`;
-      }
+     if (posicaoSpan) {
+      if (participanteEncontrado) {
+      posicaoSpan.textContent = participanteEncontrado.ordem;
+    } else {
+      posicaoSpan.textContent = "__";
+    }
+  }
+
     } catch (error) {
       console.error('Erro ao buscar posição:', error);
       if (mensagemCompleta) {
@@ -80,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   btnSair?.addEventListener('click', () => {
     // Redireciona para página inicial (ou outra que desejar)
-    window.location.href = '/../html/index1.html';
+    window.location.href = 'index.html';
   });
 
   async function gerarPDF() {

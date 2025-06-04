@@ -50,4 +50,4 @@ async function verificarSorteioConcluido() {
 }
 
 // Verifica a cada 3 segundos
-setInterval(verificarSorteioConcluido, 3000);
+setInterval(verificarSorteioConcluido, 5000);

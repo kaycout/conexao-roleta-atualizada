@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     // Configurações
     const USE_API = true;
-    const API_URL = 'http://127.0.0.1:3000/empresa/3';
+    const API_URL = 'http://127.0.0.1:3000/empresa/4';
     const FORM_SUBMIT_URL = 'http://127.0.0.1:3000/cadastrar_participante_mobile';
 
     const form = document.getElementById('cadastroForm');
@@ -31,8 +31,8 @@ document.addEventListener('DOMContentLoaded', function () {
     function obterDadosFormulario() {
         return {
             nome: document.getElementById('nome').value.trim(),
-            email: document.getElementById('equipe').value.trim(),
-            senha: document.getElementById('supervisao').value.trim()
+            equipe: document.getElementById('equipe').value.trim(),
+            supervisao: document.getElementById('supervisao').value.trim()
         };
     }
 
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Redirecionamento após sucesso
     function redirecionarAposSucesso() {
         setTimeout(() => {
-            window.location.href = 'espera.html';
+            window.location.href = '../html/espera.html';
         }, 3000);
     }
 
@@ -162,15 +162,15 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function renderizarCabecalho(dados) {
-        const dataFormatada = new Date(dados.data_sorteio).toLocaleDateString('pt-BR');
-        document.getElementById('cabecalho-dados').innerHTML = `
-            <h2>${dados.nome}</h2>
-            <p><strong>Empreendimento:</strong> ${dados.empreendimento || '---'}</p>
-            <p><strong>Data:</strong> ${dataFormatada}</p>
-            <p><strong>Período:</strong> ${dados.periodo || '---'}</p>
-        `;
-    }
-
+    console.log("Dados recebidos no cabeçalho:", dados);
+    const dataFormatada = new Date(dados.data_sorteio).toLocaleDateString('pt-BR');
+    document.getElementById('cabecalho-dados').innerHTML = `
+        <h2>${dados.nome}</h2>
+        <p><strong>Empreendimento:</strong> ${dados.empreendimento || '---'}</p>
+        <p><strong>Data:</strong> ${dataFormatada}</p>
+        <p><strong>Período:</strong> ${dados.periodo || '---'}</p>
+    `;
+}
     function mostrarErroCabecalho() {
         document.getElementById('cabecalho-dados').innerHTML = `
             <div class="alert alert-warning">
@@ -199,3 +199,23 @@ document.addEventListener('DOMContentLoaded', function () {
     // Inicialização
     carregarCabecalho();
 });
+function dadosEmpresa(){
+
+document.getElementById("carregando").style.display ="none"
+
+alert(window.location.search)
+    let url = window.location.search.split("=")
+    let nomeEmpresa = url[2].split("&")[0]
+    let nomeEmpreendimento = url[3].split("&")[0]
+    let data = url[4].split("&")[0]
+    let periodo = url[5].split("&")[0]
+
+    document.getElementById("dadosSorteio").innerHTML+=`Empresa: ${nomeEmpresa}<br>`
+    document.getElementById("dadosSorteio").innerHTML+=`Empreedimento: ${nomeEmpreendimento}<br>`
+    document.getElementById("dadosSorteio").innerHTML+=`Data: ${data}<br>`
+    document.getElementById("dadosSorteio").innerHTML+=`Período: ${periodo}`
+    
+}
+
+
+   
