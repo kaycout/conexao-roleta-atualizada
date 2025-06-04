@@ -60,8 +60,8 @@ function carregarParticipantesMobile() {
           <div class="participante_mobile">
             <p>Id: ${part.id}</p>
             <h2>Nome: ${part.nome}</h2>
-            <h3>Email: ${part.email}</h3>
-            <h4>Senha: ${part.senha}</h4>
+            <h3>Equipe: ${part.equipe}</h3>
+            <h4>Supervisao: ${part.supervisao}</h4>
           </div>`;
       });
       container.innerHTML = saida;
@@ -70,10 +70,10 @@ function carregarParticipantesMobile() {
 
 function cadastrarParticipanteMobile() {
   const nome = document.getElementById("nome").value;
-  const email = document.getElementById("email").value;
-  const senha = document.getElementById("senha").value;
+  const equipe = document.getElementById("equipe").value;
+  const supervisao = document.getElementById("supervisao").value;
 
-  if (!nome || !email || !senha) {
+  if (!nome || !equipe || !supervisao) {
     alert("Por favor, preencha todos os campos!");
     return;
   }
@@ -84,7 +84,7 @@ function cadastrarParticipanteMobile() {
       "Accept": "application/json",
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({ nome, email, senha })
+    body: JSON.stringify({ nome, equipe, supervisao })
   })
     .then(res => res.json())
     .then(dados => {
@@ -214,6 +214,28 @@ function criarRoleta() {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({ empresa, empreendimento, data, periodo })
+  })
+  .then(res => res.json())
+  .then(data => {
+    console.log("Resposta do servidor:", data);
+  })
+  .catch(err => {
+    console.error("Erro ao criar sorteio:", err);
+  });
+}
+
+function cadastrarQrcode() {
+  const codigo = document.getElementById("codigo").value
+  const data_geracao = document.getElementById("data_geracao") .value
+ 
+  console.log({ codigo, data_geracao })
+
+  fetch("http://localhost:3000/cadastrar/Qrcode", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ codigo, data_geracao })
   })
   .then(res => res.json())
   .then(data => {

@@ -20,6 +20,8 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
+const QRCode = require('qrcode');
+
 //verifica e cria a pasta uploads se não existir
 if (!fs.existsSync("uploads")) {
     fs.mkdirSync("uploads");
@@ -29,7 +31,7 @@ if (!fs.existsSync("uploads")) {
 const PDFDocument = require("pdfkit");
 
 
-//para  não gerar arquivos tão grandes 
+//para não gerar arquivos tão grandes 
 const doc = new PDFDocument({ size: 'A4' });
 
 
@@ -52,6 +54,8 @@ const con = mysql.createConnection({
 //post => para enviar dados para o banco.
 //put => atualiza os dados do banco.
 //delete => apaga os dados do banco.
+
+
 
 const app = express(); //criaçao do app, ele controla tudo no servidor, responsável por organizar
 //o que entra ou o que sai, o que quer, o que vai e o que responder.
@@ -119,6 +123,45 @@ app.get("/listar_participante", (req, res) => {
         });
 });
 
+app.get("/participante/roleta/:id_sorteio", (req, res) => {
+    const { id_sorteio } = req.params;
+
+    //consulta o sorteio e a empresa
+    const sqlSorteio = `
+        SELECT s.id AS id_sorteio, s.nome_responsavel, s.email_responsavel, s.senha_responsavel, s.data_criacao, s.status, s.finalizado, e.nome AS nome_empresa
+        FROM sorteio s
+        JOIN empresa e ON s.id_empresa = e.id
+        WHERE s.id = ?
+    `;
+
+    con.query(sqlSorteio, [id_sorteio], (errSorteio, resultadoSorteio) => {
+        if (errSorteio) {
+            return res.status(500).send({ erro: "Erro ao buscar sorteio, tente novamente.", detalhes: errSorteio });
+        }
+
+        if (resultadoSorteio.length === 0) {
+            return res.status(404).send({ msg: "Sorteio não encontrado." });
+        }
+
+        // Consulta os participantes
+        const sqlParticipantes = `
+            SELECT id, nome, equipe, supervisao, via_qr
+            FROM participante
+            WHERE id_sorteio = ?
+        `;
+
+        con.query(sqlParticipantes, [id_sorteio], (errPart, resultadoPart) => {
+            if (errPart) {
+                return res.status(500).send({ erro: "Erro ao buscar participantes.", detalhes: errPart });
+            }
+
+            res.send({
+                sorteio: resultadoSorteio[0],
+                participantes: resultadoPart
+            });
+        });
+    });
+});
 
 app.post("/participante", (req, res) => {
     let participantes = req.body;
@@ -539,22 +582,17 @@ app.get("/listar_participante_mobile", (req, res) => {
 
 //Rota para cadastrar usuário no MOBILE
 
-const bcrypt = require("bcrypt"); // biblioteca de criptografia de senha
-
 app.post("/cadastrar_participante_mobile", async (req, res) => {
-    const { nome, email, senha } = req.body;
+    const { nome, equipe, supervisao } = req.body;
 
     // Verificação dos campos obrigatórios
-    if (!nome || !email || !senha) {
+    if (!nome || !equipe || !supervisao) {
         return res.status(400).send({ msg: "Campos obrigatórios não preenchidos." });
     }
 
     try {
-        // Criptografa a senha com custo 10
-        const senhaCriptografada = await bcrypt.hash(senha, 10);
-
-        const sql = "INSERT INTO participante_mobile (nome, email, senha) VALUES (?, ?, ?)";
-        con.query(sql, [nome, email, senhaCriptografada], (error, result) => {
+        const sql = "INSERT INTO participante_mobile (nome, equipe, supervisao) VALUES (?, ?, ?)";
+        con.query(sql, [nome, equipe, supervisao], (error, result) => {
             if (error) {
                 return res.status(500).send({
                     erro: "Erro ao cadastrar participante.",
@@ -569,11 +607,12 @@ app.post("/cadastrar_participante_mobile", async (req, res) => {
         });
     } catch (err) {
         res.status(500).send({
-            erro: "Erro na criptografia da senha.",
+            erro: "Erro no cadastro.",
             detalhes: err.message || err
         });
     }
 });
+
 
 app.delete("/remover/participante_mobile/:id", (req, res) => {
     const { id } = req.params;
@@ -587,7 +626,35 @@ app.delete("/remover/participante_mobile/:id", (req, res) => {
     });
 });
 
-//inicializar servidor
-app.listen(3000, () => {
-    console.log("Servidor rodando na porta 3000");
+// Rota para cadastrar QR Code
+app.post("/cadastrar/Qrcode", async (req, res) => {
+  const { codigo, descricao } = req.body;
+
+  if (!codigo) {
+    return res.status(400).json({ message: 'O campo "codigo" é obrigatório.' });
+  }
+
+  try {
+    const [result] = await db.execute(
+      'INSERT INTO qrcodes (codigo, descricao) VALUES (?, ?)',
+      [codigo, descricao || null]
+    );
+
+    res.status(201).json({ message: 'QR Code cadastrado com sucesso!', id: result.insertId });
+  } catch (error) {
+    console.error('Erro ao cadastrar QR Code:', error);
+    res.status(500).json({ message: 'Erro interno ao cadastrar QR Code.' });
+  }
 });
+
+app.use("/mobile.03.atualizado/html", express.static(path.join(__dirname, "mobile.03.atualizado/html")));
+
+//inicializar servidor
+
+const PORT = 3000;
+const IP = '192.168.15.7';
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Servidor rodando em http://${IP}:${PORT}`);
+});
+
