@@ -155,3 +155,5 @@ API backend desenvolvida em **Node.js**, **Express** e **MySQL** para gerenciar 
 | sorteio     | id, nome_responsavel, email_responsavel, senha_responsavel, data_criacao, status | Dados e status dos sorteios.          |
 
 ---
+
+### Desenvolvido por Kaylane Coutinho.
